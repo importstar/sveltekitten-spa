@@ -1,17 +1,7 @@
 <script lang="ts">
-	import LoginForm from './login-form.svelte';
-	import type { PageProps } from './$types';
-	import fastapiClient from '$lib/api/fastapi-client';
-	import { onMount } from 'svelte';
-
-	let { data }: PageProps = $props();
-
-	onMount(async () => {
-		const response = await fastapiClient.GET('/');
-		console.log('API response:', response);
-	});
+	import LoginForm from "$lib/components/login-form.svelte";
 </script>
 
-<div class="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
-	<LoginForm form={data.form} />
+<div class="flex h-screen w-full items-center justify-center px-4">
+	<LoginForm />
 </div>

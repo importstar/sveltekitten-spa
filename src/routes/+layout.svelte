@@ -4,7 +4,6 @@
 	import { env } from '$env/dynamic/public';
 	import { QueryClientProvider } from '@tanstack/svelte-query';
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
-	import { logger } from '$lib/logger';
 
 	let { children, data } = $props();
 </script>

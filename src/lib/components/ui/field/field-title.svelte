@@ -12,8 +12,11 @@
 
 <div
 	bind:this={ref}
-	data-slot="card-footer"
-	class={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+	data-slot="field-title"
+	class={cn(
+		"flex w-fit items-center gap-2 text-sm leading-snug font-medium group-data-[disabled=true]/field:opacity-50",
+		className
+	)}
 	{...restProps}
 >
 	{@render children?.()}
