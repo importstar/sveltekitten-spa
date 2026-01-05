@@ -1,5 +1,5 @@
 import createClient from 'openapi-fetch';
-import type { paths } from './paths/fastapi';
+import type { paths } from './openapi';
 
 // Define a clear type for the SvelteKit event object for server-side usage.
 type ServerEvent = {
