@@ -12,69 +12,98 @@
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth.svelte';
 
+	// Helper functions
+	function extractErrorMessage(error: any): string {
+		if (typeof error === 'object' && error !== null) {
+			if ('message' in error && typeof error.message === 'string') {
+				return error.message;
+			}
+			if ('detail' in error && typeof error.detail === 'string') {
+				return error.detail;
+			}
+			if ('errors' in error && Array.isArray(error.errors) && error.errors[0]?.msg) {
+				return error.errors[0].msg;
+			}
+		}
+		return 'Invalid credentials or server error';
+	}
+
+	function createFormError(form: any, message: string) {
+		return {
+			form: {
+				...form,
+				valid: false,
+				errors: { username: [message] }
+			}
+		};
+	}
+
+	async function handleLoginSuccess(loginData: any, meData: any) {
+		authStore.login(loginData, {
+			username: meData.username,
+			name: meData.name,
+			id: meData.id,
+			role: meData.role,
+			is_active: meData.is_active,
+			email: meData.email,
+			last_login_date: meData.last_login_date,
+			created_at: meData.created_at
+		});
+		toast.success('Login successful!');
+		await goto('/').catch(console.error);
+	}
+
 	const form = superForm(defaults(zod4(loginSchema)), {
 		SPA: true,
 		validators: zod4(loginSchema),
 		resetForm: false,
 		onUpdate: async ({ form }) => {
-			if (form.valid) {
-				try {
-					console.log('Form is valid:', form.data);
-					toast.success('Form is valid and ready to submit!');
-					const { data, error } = await client.POST('/v1/auth/login', {
-						body: {
-							...form.data,
-							platform: 'web'
-						},
-						credentials: 'include'
-					});
-					console.log('Login response:', { data, error });
-
-					if (error) {
-						const errorMessage = error.errors?.[0]?.msg || 'Unknown error';
-						throw new Error('Login failed: ' + errorMessage);
-					}
-
-					if (!data) {
-						throw new Error('No login data received');
-					}
-
-					reset();
-
-					const me = await client.GET('/v1/users/me', {
-						headers: {
-							Authorization: `Bearer ${data.access_token}`
-						}
-					});
-					console.log('Me response:', { me });
-
-					if (!me.data) {
-						throw new Error('Failed to retrieve user data');
-					}
-
-					authStore.login(data, {
-						username: me.data.username,
-						name: me.data.name,
-						id: me.data.id,
-						role: me.data.role,
-						is_active: me.data.is_active,
-						email: me.data.email,
-						last_login_date: me.data.last_login_date,
-						created_at: me.data.created_at
-					});
-					toast.success('Login successful!');
-
-					// Redirect to home page
-					await goto('/').catch(console.error);
-				} catch (err) {
-					console.error('Login error:', err);
-					const message = err instanceof Error ? err.message : 'Login failed';
-					toast.error(message);
-					throw err; // Re-throw to let superForm know submission failed
-				}
-			} else {
+			if (!form.valid) {
 				toast.error('Form not valid. Please check the fields.');
-				throw new Error('Form validation failed');
+				return;
+			}
+
+			try {
+				console.log('Form is valid:', form.data);
+				toast.success('Form is valid and ready to submit!');
+
+				// Login request
+				const { data: loginData, error: loginError } = await client.POST('/v1/auth/login', {
+					body: { ...form.data, platform: 'web' }
+				});
+				console.log('Login response:', { data: loginData, error: loginError });
+
+				if (loginError) {
+					console.error('Login error details:', loginError);
+					const message = extractErrorMessage(loginError);
+					toast.error(message);
+					return createFormError(form, message);
+				}
+
+				if (!loginData) {
+					toast.error('No login data received');
+					return createFormError(form, 'No login data received');
+				}
+
+				reset();
+
+				// Get user profile
+				const { data: meData } = await client.GET('/v1/users/me', {
+					headers: { Authorization: `Bearer ${loginData.access_token}` }
+				});
+				console.log('Me response:', { me: meData });
+
+				if (!meData) {
+					toast.error('Failed to retrieve user data');
+					return createFormError(form, 'Failed to retrieve user data');
+				}
+
+				await handleLoginSuccess(loginData, meData);
+			} catch (err) {
+				console.error('Login error:', err);
+				const message = err instanceof Error ? err.message : 'Login failed';
+				toast.error(message);
+				return createFormError(form, message);
 			}
 		}
 	});
