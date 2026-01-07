@@ -44,6 +44,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Logout
+         * @description Logout and clear refresh token cookie.
+         */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/refresh_token": {
         parameters: {
             query?: never;
@@ -233,30 +253,6 @@ export interface components {
              */
             client_secret?: string | null;
         };
-        /** Body_login_v1_auth_login_post */
-        Body_login_v1_auth_login_post: {
-            /** Grant Type */
-            grant_type?: string | null;
-            /** Username */
-            username: string;
-            /**
-             * Password
-             * Format: password
-             */
-            password: string;
-            /**
-             * Scope
-             * @default
-             */
-            scope: string;
-            /** Client Id */
-            client_id?: string | null;
-            /**
-             * Client Secret
-             * Format: password
-             */
-            client_secret?: string | null;
-        };
         /**
          * CreatePet
          * @description Schema for creating a new pet
@@ -325,6 +321,11 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** Message */
+        Message: {
+            /** Detail */
+            detail: string;
+        };
         /** Page[PetResponse] */
         Page_PetResponse_: {
             /** Items */
@@ -381,14 +382,28 @@ export interface components {
             /** Id */
             id?: components["schemas"]["PydanticObjectId"] | string | null;
         };
+        /**
+         * Platform
+         * @enum {string}
+         */
+        Platform: "web" | "mobile";
         /** @example 5eb7cf5a86d9755df3a6c593 */
         PydanticObjectId: string;
+        /** SignIn */
+        SignIn: {
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
+            /** @default mobile */
+            platform: components["schemas"]["Platform"];
+        };
         /** Token */
         Token: {
             /** Access Token */
             access_token: string;
             /** Refresh Token */
-            refresh_token: string;
+            refresh_token?: string | null;
             /** Token Type */
             token_type: string;
             /** Expires In */
@@ -563,7 +578,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/x-www-form-urlencoded": components["schemas"]["Body_login_v1_auth_login_post"];
+                "application/json": components["schemas"]["SignIn"];
             };
         };
         responses: {
@@ -583,6 +598,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Message"];
                 };
             };
         };
