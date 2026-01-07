@@ -11,7 +11,6 @@ type ServerEvent = {
 export function createFastApiClient(event?: ServerEvent) {
 	const client = createClient<paths>({
 		baseUrl: PUBLIC_API_URL
-		// credentials: 'include'
 	});
 
 	return client;

@@ -24,11 +24,12 @@ export async function requireAuth() {
 
 	// ✅ รอให้ auth store โหลดจาก storage ก่อน
 	console.log('[Auth Guard] Waiting for auth store initialization...');
-	await authStore.ensureInitialized();
+	authStore.ensureInitialized();
 	console.log('[Auth Guard] Auth store initialized, state:', {
 		isAuthenticated: authStore.isAuthenticated,
 		hasAccessToken: !!authStore.accessToken,
-		hasRefreshToken: !!authStore.refreshToken,
+		// [CapacitorJS] Uncomment for mobile app
+		// hasRefreshToken: !!authStore.refreshToken,
 		expiresAt: authStore.expiresAt
 	});
 
@@ -37,35 +38,39 @@ export async function requireAuth() {
 		throw redirect(302, '/login');
 	}
 
-	// คล้าย SSR: เช็ค access token expired ก่อน
+	// เช็ค access token expired
 	const accessTokenExpired = authStore.isTokenExpired(60); // buffer 60 seconds
-	const refreshTokenExpired = authStore.isRefreshTokenExpired(60); // buffer 60 seconds
+	// [CapacitorJS] Uncomment for mobile app
+	// const refreshTokenExpired = authStore.isRefreshTokenExpired(60); // buffer 60 seconds
 
 	console.log('[Auth Guard] Token status:', {
-		accessTokenExpired,
-		refreshTokenExpired
+		accessTokenExpired
+		// [CapacitorJS] Uncomment for mobile app
+		// refreshTokenExpired
 	});
 
 	if (accessTokenExpired) {
-		console.log('[Auth Guard] ⚠️ Access token is expired, checking refresh token...');
+		console.log('[Auth Guard] ⚠️ Access token is expired, attempting to refresh...');
 
-		// คล้าย SSR: ถ้า refresh token ยังไม่หมดอายุ ให้ลอง refresh
-		if (!refreshTokenExpired) {
-			console.log('[Auth Guard] Refresh token still valid, attempting to refresh...');
-			const refreshed = await ensureValidToken();
-			console.log('[Auth Guard] Refresh result:', refreshed);
+		// [Web] Use httpOnly cookie - browser sends cookie automatically
+		console.log('[Auth Guard] Attempting to refresh using httpOnly cookie...');
 
-			if (!refreshed) {
-				console.log('[Auth Guard] ❌ Refresh failed, redirecting to login');
-				throw redirect(302, '/login');
-			}
-			console.log('[Auth Guard] ✅ Token refreshed successfully');
-		} else {
-			// คล้าย SSR: ถ้าทั้ง access และ refresh token หมดอายุ ให้ redirect ไป login
-			console.log('[Auth Guard] ❌ Both access & refresh tokens expired, redirecting to login');
-			authStore.logout();
+		// [CapacitorJS] Uncomment for mobile app - check refresh token before attempting refresh
+		// if (refreshTokenExpired) {
+		// 	console.log('[Auth Guard] ❌ Both access & refresh tokens expired, redirecting to login');
+		// 	authStore.logout();
+		// 	throw redirect(302, '/login');
+		// }
+		// console.log('[Auth Guard] Refresh token still valid, attempting to refresh...');
+
+		const refreshed = await ensureValidToken();
+		console.log('[Auth Guard] Refresh result:', refreshed);
+
+		if (!refreshed) {
+			console.log('[Auth Guard] ❌ Refresh failed, redirecting to login');
 			throw redirect(302, '/login');
 		}
+		console.log('[Auth Guard] ✅ Token refreshed successfully');
 	} else {
 		console.log('[Auth Guard] ✅ Access token is still valid');
 	}

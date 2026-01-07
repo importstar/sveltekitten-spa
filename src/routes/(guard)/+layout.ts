@@ -7,7 +7,8 @@ export const load = (async () => {
 	console.log('[Guard Layout] Before requireAuth - authStore state:', {
 		isAuthenticated: authStore.isAuthenticated,
 		hasAccessToken: !!authStore.accessToken,
-		hasRefreshToken: !!authStore.refreshToken,
+		// [CapacitorJS] Uncomment for mobile app
+		// hasRefreshToken: !!authStore.refreshToken,
 		expiresAt: authStore.expiresAt
 	});
 

@@ -9,7 +9,8 @@ const AUTH_KEY = 'auth_state';
 interface AuthState {
 	user: User | null;
 	accessToken: string | null;
-	refreshToken: string | null;
+	// [CapacitorJS] Uncomment for mobile app that stores refresh token locally
+	// refreshToken: string | null;
 	tokenType: string | null;
 	expiresAt: string | null;
 	isAuthenticated: boolean;
@@ -19,7 +20,8 @@ class AuthStore {
 	private state = $state<AuthState>({
 		user: null,
 		accessToken: null,
-		refreshToken: null,
+		// [CapacitorJS] Uncomment for mobile app
+		// refreshToken: null,
 		tokenType: null,
 		expiresAt: null,
 		isAuthenticated: false
@@ -54,9 +56,10 @@ class AuthStore {
 	get accessToken() {
 		return this.state.accessToken;
 	}
-	get refreshToken() {
-		return this.state.refreshToken;
-	}
+	// [CapacitorJS] Uncomment for mobile app
+	// get refreshToken() {
+	// 	return this.state.refreshToken;
+	// }
 	get tokenType() {
 		return this.state.tokenType;
 	}
@@ -80,7 +83,8 @@ class AuthStore {
 		this.state = {
 			user,
 			accessToken: tokens.access_token,
-			refreshToken: tokens.refresh_token,
+			// [CapacitorJS] Uncomment for mobile app
+			// refreshToken: tokens.refresh_token,
 			tokenType: tokens.token_type,
 			expiresAt: tokens.expires_at,
 			isAuthenticated: true
@@ -99,7 +103,8 @@ class AuthStore {
 		});
 
 		this.state.accessToken = tokens.access_token;
-		this.state.refreshToken = tokens.refresh_token;
+		// [CapacitorJS] Uncomment for mobile app
+		// this.state.refreshToken = tokens.refresh_token;
 		this.state.tokenType = tokens.token_type;
 		this.state.expiresAt = tokens.expires_at;
 		this.saveToStorage();
@@ -119,8 +124,6 @@ class AuthStore {
 
 		this.state.accessToken = accessToken;
 		this.state.tokenType = tokenType;
-		// refresh_token ยังคงเดิม
-		// expiresAt จะมาจาก JWT exp โดยตรง
 		this.saveToStorage();
 	}
 
@@ -128,7 +131,8 @@ class AuthStore {
 		this.state = {
 			user: null,
 			accessToken: null,
-			refreshToken: null,
+			// [CapacitorJS] Uncomment for mobile app
+			// refreshToken: null,
 			tokenType: null,
 			expiresAt: null,
 			isAuthenticated: false
@@ -195,13 +199,14 @@ class AuthStore {
 		return this.isJwtExpired(this.state.accessToken, bufferTime);
 	}
 
-	/**
-	 * Check if refresh token is expired
-	 * @param bufferTime - Buffer time in seconds (default: 60 = 1 minute)
-	 */
-	isRefreshTokenExpired(bufferTime = 60): boolean {
-		return this.isJwtExpired(this.state.refreshToken, bufferTime);
-	}
+	// [CapacitorJS] Uncomment for mobile app
+	// /**
+	//  * Check if refresh token is expired
+	//  * @param bufferTime - Buffer time in seconds (default: 60 = 1 minute)
+	//  */
+	// isRefreshTokenExpired(bufferTime = 60): boolean {
+	// 	return this.isJwtExpired(this.state.refreshToken, bufferTime);
+	// }
 
 	/**
 	 * Check if access token is about to expire (within specified seconds)
@@ -237,17 +242,20 @@ class AuthStore {
 				console.log('[Auth Store] ✓ Loaded from localStorage:', {
 					hasUser: !!this.state.user,
 					hasAccessToken: !!this.state.accessToken,
-					hasRefreshToken: !!this.state.refreshToken,
+					// [CapacitorJS] Uncomment for mobile app
+					// hasRefreshToken: !!this.state.refreshToken,
 					isAuthenticated: this.state.isAuthenticated
 				});
 
 				// ตรวจสอบ token expiry หลังจากโหลด
 				if (this.state.accessToken) {
 					const accessExpired = this.isJwtExpired(this.state.accessToken, 0);
-					const refreshExpired = this.isJwtExpired(this.state.refreshToken, 0);
+					// [CapacitorJS] Uncomment for mobile app
+					// const refreshExpired = this.isJwtExpired(this.state.refreshToken, 0);
 					console.log('[Auth Store] Token status on load:', {
-						accessTokenExpired: accessExpired,
-						refreshTokenExpired: refreshExpired
+						accessTokenExpired: accessExpired
+						// [CapacitorJS] Uncomment for mobile app
+						// refreshTokenExpired: refreshExpired
 					});
 				}
 			} else {

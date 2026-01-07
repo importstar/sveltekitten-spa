@@ -1,13 +1,22 @@
 <script>
+	import Button from '$lib/components/ui/button/button.svelte';
 	import { Card, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
 
 	import { useHealthStatus } from '$lib/features/health/queries';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	const healthQuery = useHealthStatus();
 </script>
 
 <div class="container mx-auto p-6">
 	<h1 class="mb-6 text-3xl font-bold">API Server Status</h1>
+	<div class="mb-6">
+		{#if authStore.isAuthenticated}
+			<Button href="/me" variant="secondary">
+				Logged in as: {authStore.user?.username}
+			</Button>
+		{/if}
+	</div>
 	<div>
 		<Card class="max-w-md">
 			<CardHeader>
