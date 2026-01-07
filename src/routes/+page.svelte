@@ -3,6 +3,7 @@
 	import { Card, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
 
 	import { useHealthStatus } from '$lib/features/health/queries';
+	import LogoutButton from '$lib/features/login/components/logout-button.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 
 	const healthQuery = useHealthStatus();
@@ -15,6 +16,9 @@
 			<Button href="/me" variant="secondary">
 				Logged in as: {authStore.user?.username}
 			</Button>
+			<LogoutButton />
+		{:else}
+			<Button href="/login">Login</Button>
 		{/if}
 	</div>
 	<div>
