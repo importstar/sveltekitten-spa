@@ -27,7 +27,7 @@
 	</title>
 </svelte:head>
 
-<Toaster position="top-center" expand={true} richColors />
+<Toaster position="top-right" richColors />
 
 <QueryClientProvider client={queryClient}>
 	{@render children?.()}
