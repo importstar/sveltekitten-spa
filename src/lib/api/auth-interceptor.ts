@@ -80,6 +80,10 @@ export async function refreshAccessToken(): Promise<boolean> {
 			if (!response.ok) {
 				console.error('[Token Refresh] ❌ Failed with status:', response.status, 'Body:', error);
 
+				if (response.status === 401) {
+					authStore.logout(); // Clear State & LocalStorage
+				}
+
 				// ไม่ redirect ที่นี่ ให้ caller จัดการ
 				notifyRefreshComplete(null);
 				return false;
